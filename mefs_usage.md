@@ -2,14 +2,14 @@
 
 + mefs有三类角色: user, keeper, provider
 
-user使用存储空间
+user使用存储空间，需要为provider的存储、keeper的管理进行支付
 provider负责存储数据
 keeper负责管理：运行挑战，触发支付
 
 ## 账户申请与注册
 
-1. 每个角色通过私钥（private key）唯一标识，对外用公钥（public key）作为名字，私钥用密码（password）加密后存放；
-2. 角色需要在链上注册，mefs启动的时候会根据所属角色启动不同的服务，一个地址只运行当一个角色。
+1. 每个角色通过私钥（private key）唯一标识，对外用公钥（public key）作为名字，私钥用密码（password）加密后存放于keystore目录下；
+2. 角色需要在链上注册，mefs启动的时候会根据所属角色启动不同的服务，一个地址只运行为一个角色。
 
 ## 安装与启动
 
@@ -52,13 +52,14 @@ mefs会根据输入的私钥和密码进行初始化，默认初始化的目录�
 
 ```shell
 mefs init --sk=<private key> --pwd=<password>
+eg: mefs init --sk=0x8a1539557a547f87edef7a4d4dcf12735db77fb37b3bc879e1ee354d837d5c23 --pwd=111111
 ```
 
 参数解释：
 
 ```shell
---sk：用户的私钥
---pwd：用户密码
+--sk：用户的私钥，以0x开头的66位十六进制字符串，可用命令mefs create得到
+--pwd：用户密码，由数字、字母组成的任意字符串
 ```
 
 ### 启动
@@ -67,17 +68,18 @@ mefs init --sk=<private key> --pwd=<password>
 
 ```shell
 mefs daemon --pwd=<password>
+eg: mefs daemon --pwd=111111
 ```
 
 参数解释：
 
 ```shell
---pwd：用户密码
+--pwd：用户密码，此密码即初始化时设置的密码
 ```
 
 ## 使用LFS
 
-mefs为每一个用户提供了一个专属的加密存储空间（LFS），每个存储空间包含多个桶（bucket），每个桶包含对个对象（object）。桶的冗余策略可以在创建的时候指定，对象的数据使用对称加密方式加密。
+mefs为每一个用户提供了一个专属的加密存储空间（LFS），每个存储空间包含多个桶（bucket），桶是用户用于存储对象（object）的容器，每个桶包含多个对象（object），我们可以把对象想象成文件。桶的冗余策略可以在创建的时候指定（存储在该桶中的所有对象都使用该种冗余策略），对象的数据使用对称加密方式加密。
 
 user可以通过命令行，网络（http），以及网关（gateway）的方式进行数据的操作。
 
@@ -97,7 +99,7 @@ mefs lfs create_bucket <BucketName> --policy=<redundancy> --dc=<data count> --pc
 
 ```shell
 BucketName: 桶的名字，最小3字节最大256字节；
---policy：冗余策略，--policy=false表示使用多副本，--policy=true表示使用纠删码；
+--policy：冗余策略，--policy=false表示使用多副本，--policy=true表示使用纠删码，默认是true；
 --dc：数据块的个数；
 --pc：校验块的个数；当使用多副本策略的时候，实际的数据块为1，校验块为dc+pc-1
 --addr: user的地址，默认为空，表示用户为本地节点地址。
@@ -117,7 +119,7 @@ BucketName: <BucketName> // 创建的桶的名字
 
 + 桶列表
 
-命令描述：list_buckets显示出此用户创建的所有的桶，包含每个桶的名字，创建时间，冗余策略和冗余参数
+命令描述：list_buckets显示出此用户创建的所有的桶，包含每个桶的名字(BucketName)，创建时间(Ctime)，冗余策略(Policy)和冗余参数(DataCount、ParityCount)
 
 ```shell
 mefs lfs list_buckets --addr=<public key>
@@ -337,7 +339,7 @@ ObjectName: <ObjectName>
 
 + 列出对应的keeper
 
-命令描述：list_keepers列出与此user签署合约的keeper
+命令描述：list_keepers列出与此user签署UpKeeping合约的keeper
 
 ```shell
 mefs lfs list_keepers  
@@ -347,7 +349,7 @@ mefs lfs list_keepers
 
 + 列出对应的provider
 
-命令描述：list_providers列出此user存储数据的provider
+命令描述：list_providers列出给此user存储数据的provider
 
 ```shell
 mefs lfs list_providers
@@ -359,7 +361,7 @@ mefs lfs list_providers
 
 + 刷新元数据
 
-命令描述：fsync手动刷新lfs的元数据，在keeper上执行
+命令描述：fsync手动刷新lfs的元数据，此命令在keeper上执行。元数据包括SuperBlock、BucketInfo、ObjectInfo
 
 ```shell
 mefs lfs fsync
@@ -378,14 +380,14 @@ mefs lfs show_balance --addr=<public key>
 参数解释：
 
 ```shell
---addr: user的地址，默认为空，表示用户为本地节点地址
+--addr: user的地址（以0x开头），默认为空，表示用户为本地节点地址，即查询本地节点的余额
 ```
 
 输出为对应的金额
 
 + 查询使用的储存空间
 
-命令描述：show_balance查询用户的使用空间
+命令描述：show_storage查询用户的使用空间，即用户的所有bucket中共存储了多少数据，单位是kb
 
 ```shell
 mefs lfs show_storage --addr=<public key>
@@ -396,7 +398,7 @@ mefs lfs show_storage --addr=<public key>
 --addr: user的地址，默认为空，表示用户为本地节点地址
 ```
 
-输出为相应的空间，格式为两位小数带单位
+输出为相应的空间，格式为两位小数带单位（kb）
 
 ### http操作
 
@@ -477,7 +479,7 @@ curl  "http://127.0.0.1:5001/api/v0/lfs/list_objects?arg=<BucketName>"
 
 #### 使用
 
-一个类似与如下的命令：
+一个类似于如下的命令：
 
 ```shell
 mefs rootcmd subcmd arg1 op1=arg2
@@ -486,7 +488,7 @@ mefs rootcmd subcmd arg1 op1=arg2
 对应的http请求为：
 
 ```shell
-curl  "http://<ip>:5001/api/v0/api/v0/<roocmd>/<subcmd>?arg=<arg1>&op1=<arg2>"
+curl  "http://<ip>:5001/api/v0/api/v0/<rootcmd>/<subcmd>?arg=<arg1>&op1=<arg2>"
 ```
 
 ip为启动mefs的机器的网络地址，若运行前配置了跨域访问，可以使用外网ip进行访问，否则只能通过127.0.0.1访问。
@@ -512,16 +514,15 @@ mefs lfs start --sk=<private key> --pwd=<password>
 
 #### user代理关闭
 
-在启动mefs后，也可以代理启动其他的用户。
+在启动mefs后，也可以代理关闭其他的用户。
 
 ```go
-mefs lfs kill --pk=<public key> --pwd=<password>
+mefs lfs kill --pwd=<password>
 ```
 
 参数解释：
 
 ```shell
---sk：用户的私钥
 --pwd：用户密码
 ```
 
