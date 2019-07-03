@@ -62,7 +62,7 @@ eg: mefs init --sk=0x8a1539557a547f87edef7a4d4dcf12735db77fb37b3bc879e1ee354d837
 --pwd：用户密码，由数字、字母组成的任意字符串
 ```
 
-### 启动
+### 启动实例
 
 使用密码即可启动服务
 
@@ -75,6 +75,19 @@ eg: mefs daemon --pwd=111111
 
 ```shell
 --pwd：用户密码，此密码即初始化时设置的密码
+```
+
+### 启动用户
+在启动mefs实例后，启动用户。
+
+```shell
+mefs lfs start <addr>
+```
+
+参数解释：
+
+```shell
+addr：用户地址；为空时，启动本地用户；
 ```
 
 ## 使用LFS
@@ -99,9 +112,9 @@ mefs lfs create_bucket <BucketName> --policy=<redundancy> --dc=<data count> --pc
 
 ```shell
 BucketName: 桶的名字，最小3字节最大256字节；
---policy：冗余策略，--policy=false表示使用多副本，--policy=true表示使用纠删码，默认是true；
---dc：数据块的个数；
---pc：校验块的个数；当使用多副本策略的时候，实际的数据块为1，校验块为dc+pc-1
+--policy：冗余策略，--policy=0表示使用多副本，--policy=1表示使用纠删码，默认是使用纠删码；
+--dc：数据块的个数，默认是3；
+--pc：校验块的个数，默认是2；当使用多副本策略的时候，实际的数据块为1，校验块为dc+pc-1
 --addr: user的地址，默认为空，表示用户为本地节点地址。
 ```
 
@@ -502,14 +515,15 @@ ip为启动mefs的机器的网络地址，若运行前配置了跨域访问，�
 在启动mefs后，也可以代理启动其他的用户。
 
 ```shell
-mefs lfs start --sk=<private key> --pwd=<password>
+mefs lfs start <addr> --sk=<private key> --pwd=<password>
 ```
 
 参数解释：
 
 ```shell
---sk：用户的私钥
---pwd：用户密码
+addr：用户地址;
+--sk：用户的私钥;地址对应的私钥，若何不匹配，以私钥的地址为准；
+--pwd：用户密码;
 ```
 
 #### user代理关闭
@@ -517,12 +531,13 @@ mefs lfs start --sk=<private key> --pwd=<password>
 在启动mefs后，也可以代理关闭其他的用户。
 
 ```go
-mefs lfs kill --pwd=<password>
+mefs lfs kill addr --pwd=<password>
 ```
 
 参数解释：
 
 ```shell
+addr：用户地址
 --pwd：用户密码
 ```
 
