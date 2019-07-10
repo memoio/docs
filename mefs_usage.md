@@ -25,7 +25,7 @@ FROM limcos/environment_construction:latest
 
 MAINTAINER suzakinishi <ccyansnow@gmail.com>
 
-# download mefs
+# download latest mefs
 
 RUN wget -P /usr/local/bin/ http://97.64.124.20:8000/mefs    \
  && chmod 777 /usr/local/bin/mefs
@@ -44,6 +44,16 @@ docker build -t <image> .
 
 ```docker
 docker run -itd -v <datadir>:/root/.mefs <image> -p 5001:5001
+```
+
+
++ 更新mefs二进制
+
+```shell
+// inside docker, run below command to get latest mefs binary
+rm /usr/local/bin/mefs
+wget -P /usr/local/bin/ http://97.64.124.20:8000/mefs
+chmod 777 /usr/local/bin/mefs
 ```
 
 ### 初始化
@@ -95,6 +105,8 @@ addr：用户地址；为空时，启动本地用户；
 mefs为每一个用户提供了一个专属的加密存储空间（LFS），每个存储空间包含多个桶（bucket），桶是用户用于存储对象（object）的容器，每个桶包含多个对象（object），我们可以把对象想象成文件。桶的冗余策略可以在创建的时候指定（存储在该桶中的所有对象都使用该种冗余策略），对象的数据使用对称加密方式加密。
 
 user可以通过命令行，网络（http），以及网关（gateway）的方式进行数据的操作。
+
+也可以通过sdk进行操作，当前提供go和js两种版本。
 
 ### 命令行（cli）
 
