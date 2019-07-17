@@ -15,45 +15,10 @@ keeper负责管理：运行挑战，触发支付
 
 ### 安装
 
-使用Docker启动
-
-+ Dockerfile内容
-
-```docker
-
-FROM limcos/environment_construction:latest
-
-MAINTAINER suzakinishi <ccyansnow@gmail.com>
-
-# download latest mefs
-
-RUN wget -P /usr/local/bin/ http://97.64.124.20:8000/mefs    \
- && chmod 777 /usr/local/bin/mefs
-
-EXPOSE 4001
-EXPOSE 5001
-```
-
-+ 镜像
-
-```docker
-docker build -t <image> .
-```
-
-+ 运行容器
++ 使用docker
 
 ```docker
 docker run -itd -v <datadir>:/root/.mefs <image> -p 5001:5001
-```
-
-
-+ 更新mefs二进制
-
-```shell
-// inside docker, run below command to get latest mefs binary
-rm /usr/local/bin/mefs
-wget -P /usr/local/bin/ http://97.64.124.20:8000/mefs
-chmod 777 /usr/local/bin/mefs
 ```
 
 ### 初始化
