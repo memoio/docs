@@ -367,22 +367,6 @@ mefs lfs fsync
 
 输出为 flush success
 
-- 查询余额
-
-命令描述：show_balance 查询对应地址的余额
-
-```shell
-mefs lfs show_balance --addr=<public key>
-```
-
-参数解释：
-
-```shell
---addr: user的地址（以0x开头），默认为空，表示用户为本地节点地址，即查询本地节点的余额
-```
-
-输出为对应的金额
-
 - 查询使用的储存空间
 
 命令描述：show_storage 查询用户的使用空间，即用户的所有 bucket 中共存储了多少数据，单位是 kb
