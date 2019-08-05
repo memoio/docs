@@ -18,7 +18,7 @@ keeper 负责管理：运行挑战，触发支付
 - 使用 docker
 
 ```docker
-docker run -itd -v <datadir>:/root/.mefs <image> -p 5001:5001
+docker run -itd -v <datadir>:/root/.mefs -p 5001:5001 <image>
 ```
 
 ### 初始化
