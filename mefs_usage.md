@@ -23,7 +23,7 @@ docker run -itd -v <datadir>:/root/.mefs -p 5001:5001 <image>
 
 ### 初始化
 
-mefs 初始化，默认初始化的目录为\$HOME/.mefs，可以通过 export MEFS_PATH=<datadir>的方式设置初始化的目录。
+mefs 初始化，默认初始化的目录为\$HOME/.mefs，可以通过 export MEFS_PATH=<datadir>的方式设置初始化的目录，然后再运行 init。
 
 ```shell
 mefs init
@@ -35,12 +35,11 @@ mefs init
 
 ```shell
 mefs daemon
-eg: mefs daemon
 ```
 
-### 启动用户
+### 启动用户 LFS
 
-在启动 mefs 实例后，启动用户。
+在启动 mefs 实例后，启动用户的存储空间。第一次启动这个地址的时候需要使用 sk 参数；若设置密码，后续再启动的时候，需要加上密码。
 
 ```shell
 mefs lfs start <addr> --sk=<secret key> --pwd=<password> --dur=<duration> --cap=<capacity> --p=<price> --ks=<keeper SLA> --ps=<provider SLA>
