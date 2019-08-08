@@ -23,33 +23,19 @@ docker run -itd -v <datadir>:/root/.mefs -p 5001:5001 <image>
 
 ### 初始化
 
-mefs 会根据输入的私钥和密码进行初始化，默认初始化的目录为\$HOME/.mefs，可以通过 export MEFS_PATH=<datadir>的方式设置初始化的目录。
+mefs 初始化，默认初始化的目录为\$HOME/.mefs，可以通过 export MEFS_PATH=<datadir>的方式设置初始化的目录。
 
 ```shell
-mefs init --sk=<private key> --pwd=<password>
-eg: mefs init --sk=0x8a1539557a547f87edef7a4d4dcf12735db77fb37b3bc879e1ee354d837d5c23 --pwd=111111
-```
-
-参数解释：
-
-```shell
---sk：用户的私钥，以0x开头的66位十六进制字符串，可用命令mefs create得到
---pwd：用户密码，由数字、字母组成的任意字符串
+mefs init
 ```
 
 ### 启动实例
 
-使用密码即可启动服务
+启动 daemon 服务
 
 ```shell
-mefs daemon --pwd=<password>
-eg: mefs daemon --pwd=111111
-```
-
-参数解释：
-
-```shell
---pwd：用户密码，此密码即初始化时设置的密码
+mefs daemon
+eg: mefs daemon
 ```
 
 ### 启动用户
