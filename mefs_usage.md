@@ -197,7 +197,7 @@ mefs lfs put_object <ObjectName> <BucketName> --addr=<public key>
 参数解释：
 
 ```shell
-ObjectName：上传的数据；
+ObjectName：上传的文件的名字，使用相对或者绝对路径；
 BucketName：桶的名字；
 --addr: user的地址，默认为空，表示用户为本地节点地址
 ```
