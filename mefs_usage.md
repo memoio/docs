@@ -37,6 +37,12 @@ mefs init
 mefs daemon
 ```
 
+创建一个新的账户
+
+```shell
+mefs create
+```
+
 ### 启动用户 LFS
 
 在启动 mefs 实例后，启动用户的存储空间。第一次启动这个地址的时候需要使用 sk 参数；若设置密码，后续再启动的时候，需要加上密码。
@@ -82,7 +88,7 @@ mefs lfs create_bucket <BucketName> --policy=<redundancy> --dc=<data count> --pc
 
 ```shell
 BucketName: 桶的名字，最小3字节最大256字节；
---policy：冗余策略，--policy=0表示使用多副本，--policy=1表示使用纠删码，默认是使用纠删码；
+--policy：冗余策略，--policy=1表示使用纠删码，--policy=2表示使用多副本，默认使用纠删码；
 --dc：数据块的个数，默认是3；
 --pc：校验块的个数，默认是2；当使用多副本策略的时候，实际的数据块为1，校验块为dc+pc-1
 --addr: user的地址，默认为空，表示用户为本地节点地址。
@@ -199,7 +205,7 @@ mefs lfs put_object <ObjectName> <BucketName> --addr=<public key>
 ```shell
 ObjectName：上传的文件的名字，使用相对或者绝对路径；
 BucketName：桶的名字；
---addr: user的地址，默认为空，表示用户为本地节点地址
+--addr: user的地址，默认为空，表示用户为本地节点地址  // 为空时有异议
 ```
 
 结果输出：
@@ -208,6 +214,7 @@ BucketName：桶的名字；
 Method: Put Object
 ObjectName: <ObjectName>  // 对象的名字
 --ObjectSize: <ObjectSize> // 上传的对象的大小
+--MD5: <MD5>               // 上传的对象经过MD5加密后得到的散列值
 --Ctime: <Ctime>           // 此对象的创建时间
 --Dir: <Dir>               // 是否是目录，true为目录，false为文件
 --LatestChalTime:<LatestChalTime>  // 最近一次，此object被挑战的时间
@@ -236,7 +243,7 @@ BucketName：桶的名字；
 
 - 文件列表
 
-命令描述：list_objects 列出 BucketName 桶内所有的对象，包括对象大小，创建时间，是否是目录，最近被挑战的时间。
+命令描述：list_objects 列出 BucketName 桶内所有的对象，包括对象大小，创建时间，MD5值，是否是目录，最近被挑战的时间。
 
 ```shell
 mefs lfs list_objects <BucketName> --addr=<public key>
@@ -255,18 +262,20 @@ BucketName：桶的名字；
 Method: List Object
 ObjectName: <ObjectName>
 --ObjectSize: <ObjectSize>
+--MD5: <MD5>
 --Ctime: <Ctime>
 --Dir: <Dir>
 --LatestChalTime:<LatestChalTime>
 ObjectName: <ObjectName>
 --ObjectSize: <ObjectSize>
+--MD5: <MD5>
 --Ctime: <Ctime>
 ......
 ```
 
 - 文件信息
 
-命令描述：head_object 显示 BucketName 桶内 ObjectName 对象的大小，创建时间，最近被挑战的时间；
+命令描述：head_object 显示 BucketName 桶内 ObjectName 对象的大小，MD5值，创建时间，是否为目录，最近被挑战的时间；
 
 ```shell
 mefs lfs head_object <BucketName> <ObjectName> --addr=<public key>
@@ -286,6 +295,7 @@ BucketName：桶的名字；
 Method: Head Object
 ObjectName: <ObjectName>
 --ObjectSize: <ObjectSize>
+--MD5: <MD5>
 --Ctime: <Ctime>
 --Dir: <Dir>
 --LatestChalTime:<LatestChalTime>
@@ -350,7 +360,7 @@ mefs lfs list_providers
 mefs lfs fsync
 ```
 
-输出为 flush success
+输出为 Flush Success
 
 - 查询使用的储存空间
 
@@ -366,7 +376,7 @@ mefs lfs show_storage --addr=<public key>
 --addr: user的地址，默认为空，表示用户为本地节点地址
 ```
 
-输出为相应的空间，格式为两位小数带单位（kb）
+输出为相应的空间，格式为两位小数带单位（B）
 
 ### http 操作
 
@@ -392,7 +402,7 @@ mefs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "GET", 
 - 显示所有 bucket 的信息
 
 ```shell
-curl  "http://127.0.0.1:5001/api/v0/lfs/list_buckets?"
+curl  "http://127.0.0.1:5001/api/v0/lfs/list_buckets?addr=<public key>"
 ```
 
 输出是标准的 json 格式
@@ -424,7 +434,7 @@ curl  "http://127.0.0.1:5001/api/v0/lfs/list_buckets?"
 - 显示某 bucket 的所有 object 的信息
 
 ```shell
-curl  "http://127.0.0.1:5001/api/v0/lfs/list_objects?arg=<BucketName>"
+curl  "http://127.0.0.1:5001/api/v0/lfs/list_objects?arg=<BucketName>&addr=<public key>"
 ```
 
 输出是标准的 json 格式
@@ -483,7 +493,7 @@ mefs lfs start <addr> --sk=<private key> --pwd=<password>
 
 ```shell
 addr：用户地址;
---sk：用户的私钥;地址对应的私钥，若何不匹配，以私钥的地址为准；
+--sk：用户的私钥;地址对应的私钥，若不匹配，以私钥的地址为准；
 --pwd：用户密码;
 ```
 
@@ -513,21 +523,21 @@ mefs rootcmd subcmd arg1 op1=arg2 --addr=<public key>
 - http
 
 ```shell
-curl  "http://<ip>:5001/api/v0/api/v0/<roocmd>/<subcmd>?arg=<arg1>&op1=<arg2>&addr=<public>"
+curl  "http://<ip>:5001/api/v0/api/v0/<roocmd>/<subcmd>?arg=<arg1>&op1=<arg2>&addr=<public key>"
 ```
 
 #### example
 
-用户 pk 从 BucketName 桶内获取 ObjectName 名字的文件
+地址为 public key 的用户从 BucketName 桶内获取 ObjectName 名字的文件
 
 - cli
 
 ```shell
-mefs lfs get_object <BucketName> <ObjectName> --addr=<pk>
+mefs lfs get_object <BucketName> <ObjectName> --addr=<public key>
 ```
 
 - http
 
 ```shell
-curl  "http://127.0.0.1:5001/api/v0/lfs/get_object?arg=<BucketName>&arg=<ObjectName>&addr=<pk>"
+curl  "http://127.0.0.1:5001/api/v0/lfs/get_object?arg=<BucketName>&arg=<ObjectName>&addr=<public key>"
 ```
