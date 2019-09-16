@@ -18,23 +18,29 @@ keeper 负责管理：运行挑战，触发支付
 - 使用 docker
 
 ```docker
-docker run -itd -v <datadir>:/root/.mefs -p 5001:5001 <image>
+> docker pull memoio/mefs
+> docker run -itd -v <datadir>:/root/.mefs <image>
 ```
 
 ### 初始化
 
-mefs 初始化，默认初始化的目录为\$HOME/.mefs，可以通过 export MEFS_PATH=<datadir>的方式设置初始化的目录，然后再运行 init。
+mefs 初始化，默认初始化的目录为\$HOME/.mefs，可以通过 export MEFS_PATH=<localpath>的方式设置初始化的目录，然后再运行 init。
 
 ```shell
-mefs init
+> mefs init --sk=<your private key> --pwd=<your password>
 ```
+
+参数解释：
+
+- sk：私钥地址；
+- pwd：密码；
 
 ### 启动实例
 
 启动 daemon 服务
 
 ```shell
-mefs daemon
+> mefs daemon
 ```
 
 ### 启动用户 LFS
@@ -42,7 +48,7 @@ mefs daemon
 在启动 mefs 实例后，启动用户的存储空间。第一次启动这个地址的时候需要使用 sk 参数；若设置密码，后续再启动的时候，需要加上密码。
 
 ```shell
-mefs lfs start <addr> --sk=<secret key> --pwd=<password> --dur=<duration> --cap=<capacity> --p=<price> --ks=<keeper SLA> --ps=<provider SLA>
+mefs lfs start <addr> --sk=<secret key> --pwd=<password> --dur=<duration> --cap=<capacity> --price=<price> --ks=<keeper SLA> --ps=<provider SLA>
 ```
 
 参数解释：
@@ -51,9 +57,9 @@ mefs lfs start <addr> --sk=<secret key> --pwd=<password> --dur=<duration> --cap=
 addr：用户地址；为空时，启动本地用户；
 sk：私钥地址； 在有私钥地址的时候，以私钥地址为准；
 pwd：密码；
-dur：存储的时间长度，默认是10天；
-cap：存储的容量，默认是100MB；
-p：存储的价格；
+dur：存储的时间长度，默认是100天；
+cap：存储的容量，默认是1000MB；
+price：存储的价格；
 ks：keeper的数量；
 ps：provider的数量；
 ```
@@ -64,7 +70,7 @@ mefs 为每一个用户提供了一个专属的加密存储空间（LFS），每
 
 user 可以通过命令行，网络（http），以及网关（gateway）的方式进行数据的操作。
 
-也可以通过 sdk 进行操作，当前提供 go 和 js 两种版本。
+也可以通过 sdk 进行操作，当前提供 go 版本。
 
 ### 命令行（cli）
 
@@ -385,7 +391,23 @@ mefs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["*"]'
 mefs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "GET", "POST"]'
 ```
 
-然后启动 mefs 即可使用 http 方式进行操作。
+然后重新启动 mefs 即可使用 http 方式进行操作。
+
+#### 使用
+
+一个类似于如下的命令：
+
+```shell
+mefs rootcmd subcmd <arg1> <arg2> -opname1=<op1> -opname2=<op2>
+```
+
+对应的 http 请求为：
+
+```shell
+curl  "http://<ip>:<port>/api/v0/api/v0/<rootcmd>/<subcmd>?arg=<arg1>&arg=<arg2>&opname1=<op1>&opname2=<op2>"
+```
+
+ip 为启动 mefs 的机器的网络地址，port 默认为 5001，若运行前配置了跨域访问，可以使用外网 ip 进行访问，否则只能通过 127.0.0.1 访问。
 
 #### example
 
@@ -450,22 +472,6 @@ curl  "http://127.0.0.1:5001/api/v0/lfs/list_objects?arg=<BucketName>"
   ]
 }
 ```
-
-#### 使用
-
-一个类似于如下的命令：
-
-```shell
-mefs rootcmd subcmd arg1 op1=arg2
-```
-
-对应的 http 请求为：
-
-```shell
-curl  "http://<ip>:5001/api/v0/api/v0/<rootcmd>/<subcmd>?arg=<arg1>&op1=<arg2>"
-```
-
-ip 为启动 mefs 的机器的网络地址，若运行前配置了跨域访问，可以使用外网 ip 进行访问，否则只能通过 127.0.0.1 访问。
 
 ### 网关模式
 
