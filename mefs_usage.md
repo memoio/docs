@@ -40,13 +40,7 @@ mefs 初始化，默认初始化的目录为\$HOME/.mefs，可以通过 export M
 启动 daemon 服务
 
 ```shell
-> mefs daemon
-```
-
-创建一个新的账户
-
-```shell
-mefs create
+> mefs daemon --pwd=<your password>
 ```
 
 ### 启动用户 LFS
@@ -54,13 +48,13 @@ mefs create
 在启动 mefs 实例后，启动用户的存储空间。第一次启动这个地址的时候需要使用 sk 参数；若设置密码，后续再启动的时候，需要加上密码。
 
 ```shell
-mefs lfs start <addr> --sk=<secret key> --pwd=<password> --dur=<duration> --cap=<capacity> --price=<price> --ks=<keeper SLA> --ps=<provider SLA>
+mefs lfs start <public key> --sk=<private key> --pwd=<password> --dur=<duration> --cap=<capacity> --price=<price> --ks=<keeper SLA> --ps=<provider SLA>
 ```
 
 参数解释：
 
 ```shell
-addr：用户地址；为空时，启动本地用户；
+public key：用户地址；为空时，启动本地用户；
 sk：私钥地址； 在有私钥地址的时候，以私钥地址为准；
 pwd：密码；
 dur：存储的时间长度，默认是100天；
@@ -249,7 +243,7 @@ BucketName：桶的名字；
 
 - 文件列表
 
-命令描述：list_objects 列出 BucketName 桶内所有的对象，包括对象大小，创建时间，MD5值，是否是目录，最近被挑战的时间。
+命令描述：list_objects 列出 BucketName 桶内所有的对象，包括对象大小，创建时间，MD5 值，是否是目录，最近被挑战的时间。
 
 ```shell
 mefs lfs list_objects <BucketName> --addr=<public key>
@@ -281,7 +275,7 @@ ObjectName: <ObjectName>
 
 - 文件信息
 
-命令描述：head_object 显示 BucketName 桶内 ObjectName 对象的大小，MD5值，创建时间，是否为目录，最近被挑战的时间；
+命令描述：head_object 显示 BucketName 桶内 ObjectName 对象的大小，MD5 值，创建时间，是否为目录，最近被挑战的时间；
 
 ```shell
 mefs lfs head_object <BucketName> <ObjectName> --addr=<public key>
